@@ -42,7 +42,101 @@ if image_index != 2
 
 
 
-//obj_Button_Burst Create Event
+//**obj_DnD_Button Create Event
+//Stop the button from animating
+image_speed = 0;
+image_index = 0;
+
+
+
+//**obj_DnD_Button Alarm 0
+//Set the image index to "normal" state if no firework exists
+if !instance_exists(obj_DnD_Firework)
+{
+image_index = 0;
+}
+else alarm[0] = 1;
+
+
+
+//**obj_DnD_Button Step
+//Collision check with mouse
+if instance_position(mouse_x, mouse_y, id)
+{
+//See if button has been pressed
+if image_index != 2
+    {
+    //It hasn't, so change to "hover" state
+    image_index = 1;
+    //Check for press and that no other instance of DnD fireworks exists
+    if mouse_check_button_pressed(mb_left) && ! instance_exists(obj_DnD_Firework)
+        {
+        //Change to "pressed" state, and run an alarm to reset to "normal" state
+        alarm[0] = room_speed / 2;
+        image_index = 2;
+        audio_play_sound(snd_Button, 0, false)
+        //Create fireworks!!!
+        instance_create(random(room_width), 350, obj_DnD_Firework);
+        }
+    }
+}
+else
+{
+//Not pressed and no mouse over, so set to "normal" button state
+if image_index != 2
+    {
+    image_index =0;
+    }
+}
+
+
+
+//**obj_Simple_Button Create Event
+//Stop the button from animating
+image_speed = 0;
+image_index = 0;
+
+
+
+//**obj_Simple_Button Alarm 0
+//Set the image index to "normal" state
+image_index = 0;
+
+
+
+//**obj_Simple_Button Step
+//Collision check with mouse
+if instance_position(mouse_x, mouse_y, id)
+{
+//See if button has been pressed
+if image_index != 2
+    {
+    //It hasn't, so change to "hover" state
+    image_index = 1;
+    //Check for press
+    if mouse_check_button_pressed(mb_left)
+        {
+        //Change to "pressed" state, and run an alarm to reset to "normal" state
+        alarm[0] = room_speed / 2;
+        image_index = 2;
+        audio_play_sound(snd_Button, 0, false)
+        //Create fireworks!!!
+        instance_create(random(room_width), 400, obj_Simple_Firework);
+        }
+    }
+}
+else
+{
+//Not pressed and no mouse over, so set to "normal" button state
+if image_index != 2
+    {
+    image_index =0;
+    }
+}
+
+
+
+//**obj_Button_Burst Create Event
 //Stop the button from animating
 image_speed = 0;
 image_index = 0;
@@ -126,6 +220,199 @@ part_system_destroy(Sname);
 
 
 
+//**obj_Button_Stream Create Event
+//Stop the button from animating
+image_speed = 0;
+image_index = 0;
+
+//We are going to create the particle in this object, as we are going to use an EMITTER to create it.
+//Create the system
+Sname = part_system_create();
+
+//Create the particle type
+waterfall = part_type_create();
+part_type_shape(waterfall, pt_shape_pixel);                         //Set the particle shape to "pixel"
+part_type_size(waterfall, 1, 2, -0.10, 0);                          //Choose a random size from 100% to 200% and make it go down by 10% every step
+part_type_scale(waterfall, 8, 16);                                  //Set the scale to be 8:16
+part_type_color3(waterfall, 16777088, 16744703, 16776960);          //Set the colors pale blue, lilac, light blue
+part_type_alpha2(waterfall, 0, 1);                                  //Alpha, so it gets less transparent to opaque
+part_type_speed(waterfall, 2, 4, -0.30, 5);                         //Speed from 2 to 4 pixels per step, getting slower at 0.5 pixels per step and with 5 "wiggle"
+part_type_direction(waterfall, 0, 180, 0, 10);                      //Starting direction between 0º and 180º
+part_type_gravity(waterfall, 2, 270);                               //Strong downward gravity
+part_type_orientation(waterfall, 0, 359, 5, 0, 0);                  //Random "image angle" 
+part_type_blend(waterfall, 1);                                      //Additive blending
+part_type_life(waterfall, 5, 30);                                   //Life of the particle from 5 to 30 steps
+
+//Define the emitter that we are going to use
+emitter1 = part_emitter_create(Sname);
+
+//Set the emitter properties
+part_emitter_region(Sname, emitter1,0, 640, 0, 16, ps_shape_rectangle, ps_distr_linear);
+
+
+
+//**obj_Button_Stream Alarm 0
+//Set the image index to "normal" state
+image_index = 0;
+
+//Reset the emitter to stream 0 particles (essentially switching it off)
+part_emitter_stream(Sname, emitter1, waterfall, 0);
+
+
+
+//**obj_Button_Stream Step Event
+//Collision check with mouse
+if instance_position(mouse_x, mouse_y, id)
+{
+//See if button has been pressed
+if image_index != 2
+    {
+    //It hasn't, so change to "hover" state
+    image_index = 1;
+    //Check for press
+    if mouse_check_button_pressed(mb_left)
+        {
+        //Change to "pressed" state, and run an alarm to reset to "normal" state
+        alarm[0] = room_speed *3;
+        image_index = 2;
+        audio_play_sound(snd_Button, 0, false)
+        //Create fireworks!!!
+        //Set the emitter to stream 50 particles every step
+        part_emitter_stream(Sname, emitter1, waterfall, 50);
+        }
+    }
+}
+else
+{
+//Not pressed and no mouse over, so set to "normal" button state
+if image_index != 2
+    {
+    image_index =0;
+    }
+}
+
+
+
+//**obj_Button_Stream Room End
+///Clean up
+
+//It is vitally important that when you do not need a particle system, emitter or type, it is removed form the game
+part_type_destroy(waterfall);
+part_emitter_destroy(Sname, emitter1);
+part_system_destroy(Sname);
+
+
+
+//**obj_Button_Complex Create Event
+//Stop the button from animating
+image_speed = 0;
+image_index = 0;
+
+//Create the system and the particles
+Sname = part_system_create();
+
+//Smoke particle with no blending for movement
+smoke = part_type_create();
+part_type_shape(smoke,pt_shape_cloud);
+part_type_size(smoke,0.10,0.50,0.01,0);
+part_type_scale(smoke,0.50,0.50);
+part_type_color2(smoke,12632256,8421504);
+part_type_alpha2(smoke,1,0);
+part_type_speed(smoke,1,1,0,0);
+part_type_direction(smoke,0,359,0,0);
+part_type_gravity(smoke,0.05,90);
+part_type_orientation(smoke,0,0,0,0,1);
+part_type_blend(smoke,0);
+part_type_life(smoke,60,60);
+
+//Firework particle with multiple colors and wiggle for effect
+firework = part_type_create();
+part_type_sprite(firework,spr_Custom_Particle, false, false, true);
+part_type_size(firework,0.50,1,0,1);
+part_type_scale(firework,0.5,0.5);
+part_type_color3(firework,8454143,8453888,8421631);
+part_type_alpha3(firework,1,0,1);
+part_type_speed(firework,1,2,0,0);
+part_type_direction(firework,0,359,0,0);
+part_type_gravity(firework,0.03,270);
+part_type_orientation(firework,0,0,0,0,1);
+part_type_blend(firework,1);
+part_type_life(firework,60,120);
+
+//Flare effect that is the "carrier" particle for the other two
+flare = part_type_create();
+part_type_shape(flare,pt_shape_flare);
+part_type_size(flare,1,1,0,0.50);
+part_type_scale(flare,0.5,0.5);
+part_type_color1(flare,8454143);
+part_type_alpha2(flare,0,1);
+part_type_speed(flare,5,7,0,0);
+part_type_direction(flare,60,120,0,0);
+part_type_gravity(flare,0.03,270);
+part_type_orientation(flare,0,0,0,0,1);
+part_type_blend(flare,1);
+part_type_life(flare,60,60);
+
+//Set the step and death particles
+part_type_step(flare, 10, smoke);
+part_type_death(flare, 100, firework);
+
+//Emitter to generate our firework
+emitter1 = part_emitter_create(Sname);
+part_emitter_region(Sname,emitter1, room_width / 2, room_width / 2, 400, 400, ps_shape_ellipse, ps_distr_linear);
+
+
+
+//**obj_Button_Complex Alarm 0
+//Set the image index to "normal" state
+image_index = 0;
+
+
+
+//**obj_Button_Complex Step Event
+//Collision check with mouse
+if instance_position(mouse_x, mouse_y, id)
+{
+//See if button has been pressed
+if image_index != 2
+    {
+    //It hasn't, so change to "hover" state
+    image_index = 1;
+    //Check for press
+    if mouse_check_button_pressed(mb_left)
+        {
+        //Change to "pressed" state, and run an alarm to reset to "normal" state
+        alarm[0] = room_speed / 2;
+        image_index = 2;
+        audio_play_sound(snd_Button, 0, false)
+        //Create fireworks!!!
+        part_emitter_burst(Sname, emitter1, flare, 1);
+        }
+    }
+}
+else
+{
+//Not pressed and no mouse over, so set to "normal" button state
+if image_index != 2
+    {
+    image_index =0;
+    }
+}
+
+
+
+//**obj_Button_Complex Room End
+///Clean up
+
+//It is vitally important that when you do not need a particle system, emitter or type, it is removed form the game
+part_type_destroy(flare);
+part_type_destroy(smoke);
+part_type_destroy(firework);
+part_emitter_destroy(Sname, emitter1);
+part_system_destroy(Sname);
+
+
+
 //**obj_BuiltIn_Firework Create Event
 //Set the direction so that it moves towards the center of the screen
 direction = point_direction(x, y, room_width / 2, 100);
@@ -149,5 +436,12 @@ Drag and drop set alarm 0 to 1
 
 
 //**obj_BuiltIn_Firework Alarm 1
-Drag and drop draw explosion and set alarm 0 to -1 and set alarm 2 to 
+Drag and drop draw explosion and set alarm 0 to -1 and set alarm 2 to room_speed *3
+
+
+
+//**obj_BuiltIn_Firework Alarm 2
+Drag and Drop Destroy the instance
+
+
 
